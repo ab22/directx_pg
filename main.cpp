@@ -3,9 +3,9 @@
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR cmdLine, int cmdShow)
 {
 	// Enable run-time memory check for debug builds
-	#if defined(DEBUG) | defined(_DEBUG)
+	if constexpr (debug_mode) {
 		_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-	#endif
+	}
 
 	D3DApp d3dapp(hInstance);
 
