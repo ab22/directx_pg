@@ -11,15 +11,14 @@
 
 #if defined(DEBUG) | defined(_DEBUG)
 	constexpr bool debug_mode = true;
-#else
-	constexpr bool debug_mode = false;
-#endif
 
-#if defined(DEBUG) | defined(_DEBUG)
 	#ifndef LOG_DEBUG
 		#define LOG_DEBUG(msg) logger::log_debug(msg, __FILE__, __LINE__)
 	#endif
+
 #else
+	constexpr bool debug_mode = false;
+
 	#ifndef LOG_DEBUG
 		#define LOG_DEBUG(msg) logger::log_debug(msg)
 	#endif
