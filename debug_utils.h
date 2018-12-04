@@ -25,7 +25,6 @@ namespace debug_utils {
 			#define LOG_DEBUG(msg) logger::log_debug(msg)
 		#endif
 	#endif
-
 }
 
 namespace logger {

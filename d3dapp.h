@@ -1,6 +1,7 @@
 #pragma once
 
 #include "debug_utils.h"
+#include "com_ptr.h"
 #include "game_timer.h"
 
 // Disable macro redefinition warning inside Direct 3D header files.
@@ -47,14 +48,14 @@ protected:
 	int       _window_height;
 	bool      _enable_4x_msaa;
 
-	ID3D11Device*           _d3d_device;
-	ID3D11DeviceContext*    _d3d_immediate_context;
-	IDXGISwapChain*         _swap_chain;
-	ID3D11Texture2D*        _depth_stencil_buffer;
-	ID3D11RenderTargetView* _render_target_view;
-	ID3D11DepthStencilView* _depth_stencil_view;
-	D3D11_VIEWPORT          _screen_viewport;
-	D3D_DRIVER_TYPE         _d3d_driver_type;
+	ComPtr<ID3D11Device>           _d3d_device;
+	ComPtr<ID3D11DeviceContext>    _d3d_immediate_context;
+	ComPtr<IDXGISwapChain>         _swap_chain;
+	ComPtr<ID3D11Texture2D>        _depth_stencil_buffer;
+	ComPtr<ID3D11RenderTargetView> _render_target_view;
+	ComPtr<ID3D11DepthStencilView> _depth_stencil_view;
+	D3D11_VIEWPORT                 _screen_viewport;
+	D3D_DRIVER_TYPE                _d3d_driver_type;
 
 	bool init_main_window();
 	bool init_direct_3d();

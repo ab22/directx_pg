@@ -219,7 +219,7 @@ bool D3DApp::init_direct_3d()
 	sd.SwapEffect   = DXGI_SWAP_EFFECT_DISCARD;
 	sd.Flags        = 0;
 
-	IDXGIDevice* dxgi_device = nullptr;
+	ComPtr<IDXGIDevice> dxgi_device;
 	hr = _d3d_device->QueryInterface(
 		__uuidof(IDXGIDevice),
 		reinterpret_cast<void**>(&dxgi_device));
@@ -229,7 +229,7 @@ bool D3DApp::init_direct_3d()
 		return false;
 	}
 
-	IDXGIAdapter* dxgi_adapter = nullptr;
+	ComPtr<IDXGIAdapter> dxgi_adapter;
 	hr = dxgi_device->GetParent(
 		__uuidof(IDXGIAdapter),
 		reinterpret_cast<void**>(&dxgi_adapter));
@@ -239,7 +239,7 @@ bool D3DApp::init_direct_3d()
 		return false;
 	}
 
-	IDXGIFactory* dxgi_factory = nullptr;
+	ComPtr<IDXGIFactory> dxgi_factory;
 	hr = dxgi_adapter->GetParent(
 		__uuidof(IDXGIFactory),
 		reinterpret_cast<void**>(&dxgi_factory));
@@ -256,11 +256,11 @@ bool D3DApp::init_direct_3d()
 		return false;
 	}
 
-	// ReleaseCom(dxgi_device);
-	// ReleaseCom(dxgi_adapter);
-	// ReleaseCom(dxgi_factory);
+	dxgi_device.release();
+	dxgi_adapter.release();
+	dxgi_factory.release();
 
-	ID3D11Texture2D* back_buffer = nullptr;
+	ComPtr<ID3D11Texture2D> back_buffer;
 	hr = _swap_chain->GetBuffer(
 		0,
 		__uuidof(ID3D11Texture2D),
@@ -278,7 +278,7 @@ bool D3DApp::init_direct_3d()
 		return false;
 	}
 
-	// ReleaseCom(back_buffer);
+	back_buffer.release();
 
 	D3D11_TEXTURE2D_DESC depth_stencil_desc;
 	depth_stencil_desc.Width     = _window_width;
