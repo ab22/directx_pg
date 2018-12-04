@@ -2,6 +2,8 @@
 
 #include <cassert>
 
+using debug_utils::debug_mode;
+
 D3DApp::D3DApp(HINSTANCE hinstance)
 	: _hinstance(hinstance)
 	, _hwnd(nullptr)
@@ -10,8 +12,8 @@ D3DApp::D3DApp(HINSTANCE hinstance)
 	, _is_maximized(false)
 	, _is_resizing(false)
 	, _m4x_msaa_quality(0)
-	, _window_width(0)
-	, _window_height(0)
+	, _window_width(800)
+	, _window_height(800)
 	, _enable_4x_msaa(false)
 	, _d3d_device(nullptr)
 	, _d3d_immediate_context(nullptr)
@@ -61,6 +63,10 @@ bool D3DApp::init()
 		return false;
 	}
 
+	if (!init_direct_3d()) {
+		return false;
+	}
+
 	return true;
 }
 
@@ -76,8 +82,9 @@ void D3DApp::resume()
 	_game_timer.start();
 }
 
-void D3DApp::on_resize()
+void D3DApp::on_resize(int w, int h)
 {
+	assert(w > 0 && h > 0);
 }
 
 void D3DApp::on_mouse_down(WPARAM wParam, int x, int y)
@@ -95,8 +102,6 @@ void D3DApp::on_mouse_move(WPARAM wParam, int x, int y)
 bool D3DApp::init_main_window()
 {
 	constexpr TCHAR appName[] = TEXT("DirectX Playground");
-
-	LOG_DEBUG("Initializing main window...");
 
 	WNDCLASS wndclass;
 	wndclass.style         = CS_HREDRAW | CS_VREDRAW;
@@ -120,7 +125,7 @@ bool D3DApp::init_main_window()
 		appName,
 		WS_OVERLAPPEDWINDOW,
 		CW_USEDEFAULT, CW_USEDEFAULT,
-		CW_USEDEFAULT, CW_USEDEFAULT,
+		_window_width, _window_height,
 		nullptr,
 		nullptr,
 		_hinstance,
@@ -156,12 +161,12 @@ bool D3DApp::init_direct_3d()
 		&_d3d_immediate_context);
 
 	if (FAILED(hr)) {
-		MessageBox(0, TEXT("D3D11CreateDevice failed!"), 0, 0);
+		logger::log_dx_error(hr, "D3D11CreateDevice error");
 		return false;
 	}
 
 	if (feature_level != D3D_FEATURE_LEVEL_11_0) {
-		MessageBox(0, TEXT("Direct3D feature level 11 unsupported!"), 0, 0);
+		logger::log_error("Direct3D feature level 11 unsupported!");
 		return false;
 	}
 
@@ -169,6 +174,11 @@ bool D3DApp::init_direct_3d()
 		DXGI_FORMAT_R8G8B8A8_UNORM,
 		4,
 		&_m4x_msaa_quality);
+
+	if (FAILED(hr)) {
+		logger::log_dx_error(hr, "CheckMultisampleQualityLevels error");
+		return false;
+	}
 
 	assert(_m4x_msaa_quality > 0);
 
@@ -197,33 +207,63 @@ bool D3DApp::init_direct_3d()
 	sd.Flags        = 0;
 
 	IDXGIDevice* dxgi_device = nullptr;
-	_d3d_device->QueryInterface(
+	hr = _d3d_device->QueryInterface(
 		__uuidof(IDXGIDevice),
 		reinterpret_cast<void**>(&dxgi_device));
 
+	if (FAILED(hr)) {
+		logger::log_dx_error(hr, "D3D11CreateDevice error");
+		return false;
+	}
+
 	IDXGIAdapter* dxgi_adapter = nullptr;
-	dxgi_device->GetParent(
+	hr = dxgi_device->GetParent(
 		__uuidof(IDXGIAdapter),
-		reinterpret_cast<void**>(&dxgi_device));
+		reinterpret_cast<void**>(&dxgi_adapter));
+
+	if (FAILED(hr)) {
+		logger::log_dx_error(hr, "dxgi_device->GetParent error");
+		return false;
+	}
 
 	IDXGIFactory* dxgi_factory = nullptr;
-	dxgi_adapter->GetParent(
+	hr = dxgi_adapter->GetParent(
 		__uuidof(IDXGIFactory),
 		reinterpret_cast<void**>(&dxgi_factory));
 
-	dxgi_factory->CreateSwapChain(_d3d_device, &sd, &_swap_chain);
+	if (FAILED(hr)) {
+		logger::log_dx_error(hr, "dxgi_adapter->GetParent error");
+		return false;
+	}
+
+	hr = dxgi_factory->CreateSwapChain(_d3d_device, &sd, &_swap_chain);
+
+	if (FAILED(hr)) {
+		logger::log_dx_error(hr, "CreateSwapChain error");
+		return false;
+	}
 
 	// ReleaseCom(dxgi_device);
 	// ReleaseCom(dxgi_adapter);
 	// ReleaseCom(dxgi_factory);
 
 	ID3D11Texture2D* back_buffer = nullptr;
-	_swap_chain->GetBuffer(
+	hr = _swap_chain->GetBuffer(
 		0,
 		__uuidof(ID3D11Texture2D),
 		reinterpret_cast<void**>(&back_buffer));
 
-	_d3d_device->CreateRenderTargetView(back_buffer, 0, &_render_target_view);
+	if (FAILED(hr)) {
+		logger::log_dx_error(hr, "GetBuffer error");
+		return false;
+	}
+
+	hr = _d3d_device->CreateRenderTargetView(back_buffer, 0, &_render_target_view);
+
+	if (FAILED(hr)) {
+		logger::log_dx_error(hr, "CreateRenderTargetView error");
+		return false;
+	}
 
 	// ReleaseCom(back_buffer);
 
@@ -247,12 +287,22 @@ bool D3DApp::init_direct_3d()
 	depth_stencil_desc.CPUAccessFlags = 0;
 	depth_stencil_desc.MiscFlags      = 0;
 
-	_d3d_device->CreateTexture2D(&depth_stencil_desc, 0, &_depth_stencil_buffer);
-	_d3d_device->CreateDepthStencilView(
+	hr = _d3d_device->CreateTexture2D(&depth_stencil_desc, 0, &_depth_stencil_buffer);
+
+	if (FAILED(hr)) {
+		logger::log_dx_error(hr, "CreateTexture2D error");
+		return false;
+	}
+
+	hr = _d3d_device->CreateDepthStencilView(
 		_depth_stencil_buffer,
 		0,
 		&_depth_stencil_view);
 
+	if (FAILED(hr)) {
+		logger::log_dx_error(hr, "CreateDepthStencilView error");
+		return false;
+	}
 
 	_d3d_immediate_context->OMSetRenderTargets(
 		1,

@@ -74,3 +74,27 @@ void logger::log_fatal(std::string_view msg, const char* file, int line)
 {
 	logger::log(LogMode::fatal, msg, file, line);
 }
+
+void logger::log_dx_error(HRESULT hr, std::string_view msg, const char* file, int line)
+{
+	LPSTR buffer = nullptr;
+
+	FormatMessage(
+		FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_IGNORE_INSERTS,
+		nullptr,
+		hr,
+		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+		reinterpret_cast<LPTSTR>(&buffer),
+		0,
+		nullptr);
+
+	if (buffer != nullptr) {
+		std::stringstream dxerr_msg;
+		dxerr_msg << msg << ": " << buffer;
+		LocalFree(reinterpret_cast<HLOCAL>(buffer));
+
+		logger::log_error(dxerr_msg.str(), file, line);
+	} else {
+		logger::log_error(msg, file, line);
+	}
+}

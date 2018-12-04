@@ -27,7 +27,7 @@ public:
 	virtual bool init();
 	virtual void pause();
 	virtual void resume();
-	virtual void on_resize();
+	virtual void on_resize(int w, int h);
 	// virtual void update_scene(float delta) = 0;
 	// virtual void draw_scene() = 0;
 	virtual void on_mouse_down(WPARAM, int x, int y);
