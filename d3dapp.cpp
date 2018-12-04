@@ -26,8 +26,6 @@ D3DApp::D3DApp(HINSTANCE hinstance)
 
 D3DApp::~D3DApp()
 {
-	// if (_d3d_device != nullptr)
-	//	ReleaseCOM(_d3d_device);
 }
 
 HINSTANCE D3DApp::hinstance() const
@@ -47,11 +45,26 @@ float D3DApp::aspect_ratio() const
 
 int D3DApp::run()
 {
-	MSG msg;
+	MSG msg = {0};
 
-	while(GetMessage(&msg, nullptr, 0, 0)) {
-		TranslateMessage(&msg);
-		DispatchMessage(&msg);
+	_game_timer.reset();
+
+	while(msg.message != WM_QUIT) {
+		if (PeekMessage(&msg, 0, 0, 0, PM_REMOVE)) {
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+
+			continue;
+		}
+		_game_timer.tick();
+
+		if (_is_paused) {
+			calculate_frame_stats();
+			// update_scene();
+			// draw_scene();
+		} else {
+			Sleep(100);
+		}
 	}
 
 	return static_cast<int>(msg.wParam);
