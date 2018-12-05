@@ -13,8 +13,11 @@ add_executable(app
         debug_utils.cpp
 )
 
-if (CMAKE_CXX_COMPILE_ID MATCHES "MSVC")
+if (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
     target_compile_options(app PRIVATE /W4)
+    target_compile_definitions(app PRIVATE -DWIN32_LEAN_AND_MEAN)
+else()
+    message(FATAL_ERROR "> Unsupported ompiler: ${CMAKE_CXX_COMPILER_ID}")
 endif()
 
 target_link_libraries(app

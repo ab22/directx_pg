@@ -345,7 +345,6 @@ void D3DApp::calculate_frame_stats()
 		float fps  = static_cast<float>(frame_count);
 		float mspf = 1000.f / fps;
 
-
 		frame_count = 0;
 		time_elapsed += 1.0f;
 	}
