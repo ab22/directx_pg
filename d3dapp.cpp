@@ -256,10 +256,6 @@ bool D3DApp::init_direct_3d()
 		return false;
 	}
 
-	dxgi_device.release();
-	dxgi_adapter.release();
-	dxgi_factory.release();
-
 	ComPtr<ID3D11Texture2D> back_buffer;
 	hr = _swap_chain->GetBuffer(
 		0,
@@ -277,8 +273,6 @@ bool D3DApp::init_direct_3d()
 		logger::log_dx_error(hr, "CreateRenderTargetView error");
 		return false;
 	}
-
-	back_buffer.release();
 
 	D3D11_TEXTURE2D_DESC depth_stencil_desc;
 	depth_stencil_desc.Width     = _window_width;
