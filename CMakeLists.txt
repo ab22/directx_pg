@@ -10,6 +10,7 @@ add_executable(app
         main.cpp
         game_timer.cpp
         d3dapp.cpp
+        demo_app.cpp
         debug_utils.cpp
 )
 

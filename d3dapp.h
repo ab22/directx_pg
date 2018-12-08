@@ -13,6 +13,7 @@
 #include <Windows.h>
 #include <windowsx.h>
 #include <memory>
+#include <cassert>
 
 class D3DApp {
 public:
@@ -20,8 +21,8 @@ public:
 	virtual ~D3DApp();
 
 	HINSTANCE hinstance() const;
-	HWND hwnd() const;
-	float aspect_ratio() const;
+	HWND      hwnd() const;
+	float     aspect_ratio() const;
 
 	int run();
 
@@ -29,8 +30,8 @@ public:
 	virtual void pause();
 	virtual void resume();
 	virtual void on_resize(int w, int h);
-	// virtual void update_scene(float delta) = 0;
-	// virtual void draw_scene() = 0;
+	virtual void update_scene(float dt) = 0;
+	virtual void draw_scene() = 0;
 	virtual void on_mouse_down(WPARAM, int x, int y);
 	virtual void on_mouse_up(WPARAM, int x, int y);
 	virtual void on_mouse_move(WPARAM, int x, int y);

@@ -1,4 +1,4 @@
-#include "d3dapp.h"
+#include "demo_app.h"
 
 using debug_utils::debug_mode;
 
@@ -10,14 +10,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR cmdLine, i
 	}
 
 	try {
-		D3DApp d3dapp(hInstance);
+		DemoApp app(hInstance);
 
-		if (!d3dapp.init()) {
-			MessageBox(NULL, TEXT("D3DApp init failed!"), 0, MB_ICONERROR);
+		if (!app.init()) {
+			MessageBox(NULL, TEXT("App initialization failed!"), 0, MB_ICONERROR);
 			return -1;
 		}
 
-		return d3dapp.run();
+		return app.run();
 	} catch (std::exception& ex) {
 		std::stringstream msg;
 		msg << "Unhandled exception caught: " << ex.what();

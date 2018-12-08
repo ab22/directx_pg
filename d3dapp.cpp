@@ -1,7 +1,5 @@
 #include "d3dapp.h"
 
-#include <cassert>
-
 using debug_utils::debug_mode;
 
 D3DApp::D3DApp(HINSTANCE hinstance)
@@ -58,10 +56,10 @@ int D3DApp::run()
 		}
 		_game_timer.tick();
 
-		if (_is_paused) {
+		if (!_is_paused) {
 			calculate_frame_stats();
-			// update_scene();
-			// draw_scene();
+			update_scene(0);
+			draw_scene();
 		} else {
 			Sleep(100);
 		}
