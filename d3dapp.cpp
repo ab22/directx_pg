@@ -1,4 +1,5 @@
 #include "d3dapp.h"
+#include "errors.h"
 
 using debug_utils::debug_mode;
 
@@ -19,6 +20,7 @@ D3DApp::D3DApp(HINSTANCE hinstance)
 	, _depth_stencil_buffer(nullptr)
 	, _render_target_view(nullptr)
 	, _depth_stencil_view(nullptr)
+	, _screen_viewport({})
 {
 }
 
@@ -98,15 +100,15 @@ void D3DApp::on_resize(int w, int h)
 	assert(w > 0 && h > 0);
 }
 
-void D3DApp::on_mouse_down(WPARAM wParam, int x, int y)
+void D3DApp::on_mouse_down(WPARAM, int, int)
 {
 }
 
-void D3DApp::on_mouse_up(WPARAM wParam, int x, int y)
+void D3DApp::on_mouse_up(WPARAM, int, int)
 {
 }
 
-void D3DApp::on_mouse_move(WPARAM wParam, int x, int y)
+void D3DApp::on_mouse_move(WPARAM, int, int)
 {
 }
 
@@ -172,7 +174,7 @@ bool D3DApp::init_direct_3d()
 		&_d3d_immediate_context);
 
 	if (FAILED(hr)) {
-		logger::log_dx_error(hr, "D3D11CreateDevice error");
+		logger::log_sys_error(hr, "D3D11CreateDevice error");
 		return false;
 	}
 
@@ -187,7 +189,7 @@ bool D3DApp::init_direct_3d()
 		&_m4x_msaa_quality);
 
 	if (FAILED(hr)) {
-		logger::log_dx_error(hr, "CheckMultisampleQualityLevels error");
+		logger::log_sys_error(hr, "CheckMultisampleQualityLevels error");
 		return false;
 	}
 
@@ -223,7 +225,7 @@ bool D3DApp::init_direct_3d()
 		reinterpret_cast<void**>(&dxgi_device));
 
 	if (FAILED(hr)) {
-		logger::log_dx_error(hr, "D3D11CreateDevice error");
+		logger::log_sys_error(hr, "D3D11CreateDevice error");
 		return false;
 	}
 
@@ -233,7 +235,7 @@ bool D3DApp::init_direct_3d()
 		reinterpret_cast<void**>(&dxgi_adapter));
 
 	if (FAILED(hr)) {
-		logger::log_dx_error(hr, "dxgi_device->GetParent error");
+		logger::log_sys_error(hr, "dxgi_device->GetParent error");
 		return false;
 	}
 
@@ -243,14 +245,14 @@ bool D3DApp::init_direct_3d()
 		reinterpret_cast<void**>(&dxgi_factory));
 
 	if (FAILED(hr)) {
-		logger::log_dx_error(hr, "dxgi_adapter->GetParent error");
+		logger::log_sys_error(hr, "dxgi_adapter->GetParent error");
 		return false;
 	}
 
 	hr = dxgi_factory->CreateSwapChain(_d3d_device, &sd, &_swap_chain);
 
 	if (FAILED(hr)) {
-		logger::log_dx_error(hr, "CreateSwapChain error");
+		logger::log_sys_error(hr, "CreateSwapChain error");
 		return false;
 	}
 
@@ -261,14 +263,14 @@ bool D3DApp::init_direct_3d()
 		reinterpret_cast<void**>(&back_buffer));
 
 	if (FAILED(hr)) {
-		logger::log_dx_error(hr, "GetBuffer error");
+		logger::log_sys_error(hr, "GetBuffer error");
 		return false;
 	}
 
 	hr = _d3d_device->CreateRenderTargetView(back_buffer, 0, &_render_target_view);
 
 	if (FAILED(hr)) {
-		logger::log_dx_error(hr, "CreateRenderTargetView error");
+		logger::log_sys_error(hr, "CreateRenderTargetView error");
 		return false;
 	}
 
@@ -295,7 +297,7 @@ bool D3DApp::init_direct_3d()
 	hr = _d3d_device->CreateTexture2D(&depth_stencil_desc, 0, &_depth_stencil_buffer);
 
 	if (FAILED(hr)) {
-		logger::log_dx_error(hr, "CreateTexture2D error");
+		logger::log_sys_error(hr, "CreateTexture2D error");
 		return false;
 	}
 
@@ -305,7 +307,7 @@ bool D3DApp::init_direct_3d()
 		&_depth_stencil_view);
 
 	if (FAILED(hr)) {
-		logger::log_dx_error(hr, "CreateDepthStencilView error");
+		logger::log_sys_error(hr, "CreateDepthStencilView error");
 		return false;
 	}
 
@@ -346,43 +348,59 @@ LRESULT CALLBACK D3DApp::wnd_proc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPa
 {
 	static D3DApp* d3dapp = nullptr;
 
-	switch(msg) {
-	case WM_CREATE:
-		{
-			auto* create_params = reinterpret_cast<CREATESTRUCT*>(lParam);
-			d3dapp = reinterpret_cast<D3DApp*>(create_params->lpCreateParams);
+	try {
+		switch(msg) {
+		case WM_CREATE:
+			{
+				auto* create_params = reinterpret_cast<CREATESTRUCT*>(lParam);
+				d3dapp = reinterpret_cast<D3DApp*>(create_params->lpCreateParams);
+			}
+			return 0;
+
+		case WM_ACTIVATE:
+			if (LOWORD(wParam) == WA_INACTIVE) {
+				d3dapp->pause();
+			} else {
+				d3dapp->resume();
+			}
+
+			return 0;
+
+		case WM_MBUTTONDOWN:
+		case WM_RBUTTONDOWN:
+			d3dapp->on_mouse_down(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+			return 0;
+
+		case WM_LBUTTONUP:
+		case WM_MBUTTONUP:
+		case WM_RBUTTONUP:
+			d3dapp->on_mouse_up(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+			return 0;
+
+		case WM_MOUSEMOVE:
+			d3dapp->on_mouse_down(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+			return 0;
+
+		case WM_DESTROY:
+			PostQuitMessage(0);
+			return 0;
+
 		}
-		return 0;
 
-	case WM_ACTIVATE:
-		if (LOWORD(wParam) == WA_INACTIVE) {
-			d3dapp->pause();
-		} else {
-			d3dapp->resume();
-		}
+		return DefWindowProc(hwnd, msg, wParam, lParam);
 
-		return 0;
+	} catch (LogError &e) {
+		// Do not call logger::log. We assume the logger will dump the
+		// error if possible.
+		MessageBoxA(hwnd, e.what(), "Fatal error!", MB_OK | MB_ICONERROR);
 
-	case WM_MBUTTONDOWN:
-	case WM_RBUTTONDOWN:
-		d3dapp->on_mouse_down(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
-		return 0;
-
-	case WM_LBUTTONUP:
-	case WM_MBUTTONUP:
-	case WM_RBUTTONUP:
-		d3dapp->on_mouse_up(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
-		return 0;
-
-	case WM_MOUSEMOVE:
-		d3dapp->on_mouse_down(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
-		return 0;
-
-	case WM_DESTROY:
 		PostQuitMessage(0);
 		return 0;
+	} catch (std::exception &e) {
+		MessageBoxA(hwnd, e.what(), "Fatal error!", MB_OK | MB_ICONERROR);
+		logger::log_fatal(e.what());
 
+		PostQuitMessage(0);
+		return 0;
 	}
-
-	return DefWindowProc(hwnd, msg, wParam, lParam);
 }

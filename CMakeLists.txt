@@ -11,7 +11,8 @@ add_executable(app
         game_timer.cpp
         d3dapp.cpp
         demo_app.cpp
-        debug_utils.cpp
+        logger.cpp
+        errors.cpp
 )
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
@@ -21,10 +22,15 @@ else()
     message(FATAL_ERROR "> Unsupported ompiler: ${CMAKE_CXX_COMPILER_ID}")
 endif()
 
+# fmt header only.
+add_subdirectory("vendor/fmt" EXCLUDE_FROM_ALL)
+
 target_link_libraries(app
+    PRIVATE
     general
         "d3d11.lib"
         "d3dcompiler.lib"
         "dxgi.lib"
         "dxguid.lib"
+        "fmt-header-only"
 )

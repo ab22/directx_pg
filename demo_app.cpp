@@ -1,4 +1,5 @@
 #include "demo_app.h"
+#include "logger.h"
 
 DemoApp::DemoApp(HINSTANCE hInstance)
 	: D3DApp(hInstance)
@@ -20,7 +21,7 @@ void DemoApp::on_resize(int w, int h)
 	D3DApp::on_resize(w, h);
 }
 
-void DemoApp::update_scene(float dt)
+void DemoApp::update_scene(float)
 {
 
 }
@@ -44,7 +45,7 @@ void DemoApp::draw_scene()
 	hr = _swap_chain->Present(0,0);
 
 	if (FAILED(hr)) {
-		logger::log_dx_error(hr, "SwapChain Present error");
+		logger::log_sys_error(hr, "SwapChain Present error");
 		return;
 	}
 }
