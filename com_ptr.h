@@ -16,7 +16,8 @@ public:
 	{
 	}
 
-	~ComPtr() {
+	~ComPtr()
+	{
 		if (_obj != nullptr)
 			_obj->Release();
 	}
