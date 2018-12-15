@@ -78,7 +78,7 @@ void logger::log_fatal(std::string_view msg)
 void logger::log_sys_error(HRESULT hr, std::string_view msg)
 {
 	using win_utils::LocalAllocDeleter;
-	using SafeLPSTR = std::unique_ptr<CHAR, LocalAllocDeleter>;
+	using LPSTR_guard = std::unique_ptr<CHAR, LocalAllocDeleter>;
 
 	LPSTR     sys_msg   = nullptr;
 	auto      msg_len = FormatMessage(
@@ -98,7 +98,7 @@ void logger::log_sys_error(HRESULT hr, std::string_view msg)
 		throw LogError(GetLastError(), "FormatMessage failed!");
 	}
 
-	SafeLPSTR str_guard(sys_msg);
-	auto      formatted_msg = fmt::format("{}: {}", msg, sys_msg);
+	LPSTR_guard str_guard(sys_msg);
+	auto        formatted_msg = fmt::format("{}: {}", msg, sys_msg);
 	logger::log_error(formatted_msg);
 }
