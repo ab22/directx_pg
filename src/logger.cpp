@@ -5,6 +5,7 @@
 #include <fmt/format.h>
 #include <fmt/time.h>
 #include <windowsx.h>
+#include <iostream>
 
 #include <string>
 
@@ -36,55 +37,45 @@ const char* logger::log_mode_text(LogMode mode)
 void logger::log(LogMode mode, std::string_view msg)
 {
 	const char* mode_str = log_mode_text(mode);
-	const char* format   = "{:%Y-%m-%d %X} [{}]: {}";
 	std::time_t t        = std::time(nullptr);
 	std::tm     tm       = {};
 	errno_t     err      = ::localtime_s(&tm, &t);
 
 	if (err != 0) {
+		// Attempt to log the error and throw an exception.
+		fmt::print("[{}]: {}", mode_str, msg);
 		throw LogError(err, "Failed to acquire localtime");
 	}
 
-	fmt::print(format, tm, mode_str, msg);
+	fmt::print("{:%Y-%m-%d %X} [{}]: {}", tm, mode_str, msg);
 }
 
-void logger::log(LogMode mode, std::string_view msg, const char* file, int line)
+void logger::log_debug(std::string_view msg)
 {
-	if (file == nullptr) {
-		logger::log(mode, msg);
-		return;
-	}
-
-	auto formatted_msg = fmt::format("{} on {}:{}", msg, file, line);
-	logger::log(mode, formatted_msg);
+	logger::log(LogMode::debug, msg);
 }
 
-void logger::log_debug(std::string_view msg, const char* file, int line)
+void logger::log_info(std::string_view msg)
 {
-	logger::log(LogMode::debug, msg, file, line);
+	logger::log(LogMode::info, msg);
 }
 
-void logger::log_info(std::string_view msg, const char* file, int line)
+void logger::log_warn(std::string_view msg)
 {
-	logger::log(LogMode::info, msg, file, line);
+	logger::log(LogMode::warn, msg);
 }
 
-void logger::log_warn(std::string_view msg, const char* file, int line)
+void logger::log_error(std::string_view msg)
 {
-	logger::log(LogMode::warn, msg, file, line);
+	logger::log(LogMode::error, msg);
 }
 
-void logger::log_error(std::string_view msg, const char* file, int line)
+void logger::log_fatal(std::string_view msg)
 {
-	logger::log(LogMode::error, msg, file, line);
+	logger::log(LogMode::fatal, msg);
 }
 
-void logger::log_fatal(std::string_view msg, const char* file, int line)
-{
-	logger::log(LogMode::fatal, msg, file, line);
-}
-
-void logger::log_sys_error(HRESULT hr, std::string_view msg, const char* file, int line)
+void logger::log_sys_error(HRESULT hr, std::string_view msg)
 {
 	using win_utils::LocalAllocDeleter;
 	using SafeLPSTR = std::unique_ptr<CHAR, LocalAllocDeleter>;
@@ -106,5 +97,5 @@ void logger::log_sys_error(HRESULT hr, std::string_view msg, const char* file, i
 
 	SafeLPSTR str_guard(sys_msg);
 	auto      formatted_msg = fmt::format("{}: {}", msg, sys_msg);
-	logger::log_error(formatted_msg, file, line);
+	logger::log_error(formatted_msg);
 }
