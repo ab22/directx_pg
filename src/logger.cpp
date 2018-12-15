@@ -92,8 +92,11 @@ void logger::log_sys_error(HRESULT hr, std::string_view msg)
 		0,
 		nullptr);
 
-	if (msg_len == 0)
+	if (msg_len == 0) {
+		// Log the user message only.
+		logger::log_error(msg);
 		throw LogError(GetLastError(), "FormatMessage failed!");
+	}
 
 	SafeLPSTR str_guard(sys_msg);
 	auto      formatted_msg = fmt::format("{}: {}", msg, sys_msg);
