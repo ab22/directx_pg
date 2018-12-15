@@ -9,6 +9,14 @@ add_executable(app
         demo_app.cpp
         logger.cpp
         errors.cpp
+        com_ptr.h
+        d3dapp.h
+        debug_utils.h
+        demo_app.h
+        errors.h
+        game_timer.h
+        logger.h
+        win_utils.h
 )
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
@@ -17,6 +25,11 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
 else()
     message(FATAL_ERROR "> Unsupported compiler: ${CMAKE_CXX_COMPILER_ID}")
 endif()
+
+target_include_directories(app
+    PRIVATE
+        "${CMAKE_CURRENT_SOURCE_DIR}"
+)
 
 target_link_libraries(app
     PRIVATE
