@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.12)
 project(directx_engine LANGUAGES CXX)
 
 add_executable(app
@@ -18,13 +18,6 @@ add_executable(app
         logger.h
         win_utils.h
 )
-
-if (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
-    target_compile_options(app PRIVATE /W4)
-    target_compile_definitions(app PRIVATE -DWIN32_LEAN_AND_MEAN)
-else()
-    message(FATAL_ERROR "> Unsupported compiler: ${CMAKE_CXX_COMPILER_ID}")
-endif()
 
 target_include_directories(app
     PRIVATE
