@@ -81,7 +81,7 @@ void logger::log_sys_error(HRESULT hr, std::string_view msg)
 	using LPSTR_guard = std::unique_ptr<CHAR, LocalAllocDeleter>;
 
 	LPSTR     sys_msg   = nullptr;
-	auto      msg_len = FormatMessage(
+	auto      msg_len   = FormatMessage(
 		FORMAT_MESSAGE_FROM_SYSTEM
 		| FORMAT_MESSAGE_ALLOCATE_BUFFER
 		| FORMAT_MESSAGE_IGNORE_INSERTS,
@@ -93,12 +93,13 @@ void logger::log_sys_error(HRESULT hr, std::string_view msg)
 		nullptr);
 
 	if (msg_len == 0) {
+		auto formatted_msg = fmt::format("{}: [HRESULT:{}]", msg, hr);
 		// Log the user message only.
-		logger::log_error(msg);
+		logger::log_error(formatted_msg);
 		throw LogError(GetLastError(), "FormatMessage failed!");
 	}
 
 	LPSTR_guard str_guard(sys_msg);
-	auto        formatted_msg = fmt::format("{}: {}", msg, sys_msg);
+	auto        formatted_msg = fmt::format("{}: [{}] {}", msg, hr, sys_msg);
 	logger::log_error(formatted_msg);
 }
