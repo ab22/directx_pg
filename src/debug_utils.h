@@ -18,4 +18,10 @@ namespace debug_utils {
 			#define DBG_LOG(msg) logger::log_debug(msg)
 		#endif
 	#endif
+
+	#if defined(WIN32_LEAN_AND_MEAN)
+		constexpr bool win32_lean_and_mean = true;
+	#else
+		constexpr bool win32_lean_and_mean = false;
+	#endif
 }

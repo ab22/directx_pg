@@ -7,7 +7,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
 	add_compile_options(/W4)
-	add_compile_definitions(-DWIN32_LEAN_AND_MEAN)
+	add_compile_definitions(WIN32_LEAN_AND_MEAN=1)
 else()
     message(FATAL_ERROR "> Unsupported compiler: ${CMAKE_CXX_COMPILER_ID}")
 endif()
