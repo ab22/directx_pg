@@ -4,11 +4,11 @@
 #include <string>
 
 class ErrorCode: public std::runtime_error {
-protected:
+  protected:
 	int         _code;
 	std::string _msg;
 
-public:
+  public:
 	ErrorCode() noexcept;
 	ErrorCode(int, const char* message) noexcept;
 	ErrorCode(ErrorCode&&) = default;
@@ -17,12 +17,12 @@ public:
 	virtual const char* what() const noexcept;
 
 	virtual ErrorCode& operator=(const ErrorCode&) = default;
-	virtual ErrorCode& operator=(ErrorCode&&)      = default;
+	virtual ErrorCode& operator=(ErrorCode&&) = default;
 
 	virtual explicit operator bool() const noexcept;
 };
 
 class LogError: public ErrorCode {
-public:
+  public:
 	LogError(int, const char* message) noexcept;
 };

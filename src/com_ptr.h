@@ -1,18 +1,18 @@
 #pragma once
 
-template<typename T>
+template <typename T>
 class ComPtr {
-private:
+  private:
 	T* _obj = nullptr;
 
-public:
+  public:
 	ComPtr()
-		: _obj(nullptr)
+	    : _obj(nullptr)
 	{
 	}
 
 	ComPtr(T* obj)
-		: _obj(obj)
+	    : _obj(obj)
 	{
 	}
 
@@ -33,7 +33,7 @@ public:
 			return 0;
 
 		ULONG ref = _obj->Release();
-		_obj = nullptr;
+		_obj      = nullptr;
 
 		return ref;
 	}

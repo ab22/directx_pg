@@ -4,23 +4,23 @@
 using debug_utils::debug_mode;
 
 D3DApp::D3DApp(HINSTANCE hinstance)
-	: _hinstance(hinstance)
-	, _hwnd(nullptr)
-	, _is_paused(false)
-	, _is_minimized(false)
-	, _is_maximized(false)
-	, _is_resizing(false)
-	, _m4x_msaa_quality(0)
-	, _window_width(800)
-	, _window_height(800)
-	, _enable_4x_msaa(false)
-	, _d3d_device(nullptr)
-	, _d3d_immediate_context(nullptr)
-	, _swap_chain(nullptr)
-	, _depth_stencil_buffer(nullptr)
-	, _render_target_view(nullptr)
-	, _depth_stencil_view(nullptr)
-	, _screen_viewport({})
+    : _hinstance(hinstance)
+    , _hwnd(nullptr)
+    , _is_paused(false)
+    , _is_minimized(false)
+    , _is_maximized(false)
+    , _is_resizing(false)
+    , _m4x_msaa_quality(0)
+    , _window_width(800)
+    , _window_height(800)
+    , _enable_4x_msaa(false)
+    , _d3d_device(nullptr)
+    , _d3d_immediate_context(nullptr)
+    , _swap_chain(nullptr)
+    , _depth_stencil_buffer(nullptr)
+    , _render_target_view(nullptr)
+    , _depth_stencil_view(nullptr)
+    , _screen_viewport({})
 {
 }
 
@@ -49,7 +49,7 @@ int D3DApp::run()
 
 	_game_timer.reset();
 
-	while(msg.message != WM_QUIT) {
+	while (msg.message != WM_QUIT) {
 		if (PeekMessage(&msg, 0, 0, 0, PM_REMOVE)) {
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
@@ -133,17 +133,9 @@ bool D3DApp::init_main_window()
 		return false;
 	}
 
-	_hwnd = CreateWindow(
-		appName,
-		appName,
-		WS_OVERLAPPEDWINDOW,
-		CW_USEDEFAULT, CW_USEDEFAULT,
-		_window_width, _window_height,
-		nullptr,
-		nullptr,
-		_hinstance,
-		reinterpret_cast<void*>(this)
-	);
+	_hwnd = CreateWindow(appName, appName, WS_OVERLAPPEDWINDOW, CW_USEDEFAULT,
+	                     CW_USEDEFAULT, _window_width, _window_height, nullptr, nullptr,
+	                     _hinstance, reinterpret_cast<void*>(this));
 
 	ShowWindow(_hwnd, true);
 	UpdateWindow(_hwnd);
@@ -161,17 +153,9 @@ bool D3DApp::init_direct_3d()
 		create_device_flags |= D3D11_CREATE_DEVICE_DEBUG;
 	}
 
-	hr = D3D11CreateDevice(
-		0,
-		D3D_DRIVER_TYPE_HARDWARE,
-		0,
-		create_device_flags,
-		0,
-		0,
-		D3D11_SDK_VERSION,
-		&_d3d_device,
-		&feature_level,
-		&_d3d_immediate_context);
+	hr = D3D11CreateDevice(0, D3D_DRIVER_TYPE_HARDWARE, 0, create_device_flags, 0, 0,
+	                       D3D11_SDK_VERSION, &_d3d_device, &feature_level,
+	                       &_d3d_immediate_context);
 
 	if (FAILED(hr)) {
 		logger::log_sys_error(hr, "D3D11CreateDevice error");
@@ -183,10 +167,8 @@ bool D3DApp::init_direct_3d()
 		return false;
 	}
 
-	_d3d_device->CheckMultisampleQualityLevels(
-		DXGI_FORMAT_R8G8B8A8_UNORM,
-		4,
-		&_m4x_msaa_quality);
+	_d3d_device->CheckMultisampleQualityLevels(DXGI_FORMAT_R8G8B8A8_UNORM, 4,
+	                                           &_m4x_msaa_quality);
 
 	if (FAILED(hr)) {
 		logger::log_sys_error(hr, "CheckMultisampleQualityLevels error");
@@ -220,9 +202,8 @@ bool D3DApp::init_direct_3d()
 	sd.Flags        = 0;
 
 	ComPtr<IDXGIDevice> dxgi_device;
-	hr = _d3d_device->QueryInterface(
-		__uuidof(IDXGIDevice),
-		reinterpret_cast<void**>(&dxgi_device));
+	hr = _d3d_device->QueryInterface(__uuidof(IDXGIDevice),
+	                                 reinterpret_cast<void**>(&dxgi_device));
 
 	if (FAILED(hr)) {
 		logger::log_sys_error(hr, "D3D11CreateDevice error");
@@ -230,9 +211,8 @@ bool D3DApp::init_direct_3d()
 	}
 
 	ComPtr<IDXGIAdapter> dxgi_adapter;
-	hr = dxgi_device->GetParent(
-		__uuidof(IDXGIAdapter),
-		reinterpret_cast<void**>(&dxgi_adapter));
+	hr = dxgi_device->GetParent(__uuidof(IDXGIAdapter),
+	                            reinterpret_cast<void**>(&dxgi_adapter));
 
 	if (FAILED(hr)) {
 		logger::log_sys_error(hr, "dxgi_device->GetParent error");
@@ -240,9 +220,8 @@ bool D3DApp::init_direct_3d()
 	}
 
 	ComPtr<IDXGIFactory> dxgi_factory;
-	hr = dxgi_adapter->GetParent(
-		__uuidof(IDXGIFactory),
-		reinterpret_cast<void**>(&dxgi_factory));
+	hr = dxgi_adapter->GetParent(__uuidof(IDXGIFactory),
+	                             reinterpret_cast<void**>(&dxgi_factory));
 
 	if (FAILED(hr)) {
 		logger::log_sys_error(hr, "dxgi_adapter->GetParent error");
@@ -257,10 +236,8 @@ bool D3DApp::init_direct_3d()
 	}
 
 	ComPtr<ID3D11Texture2D> back_buffer;
-	hr = _swap_chain->GetBuffer(
-		0,
-		__uuidof(ID3D11Texture2D),
-		reinterpret_cast<void**>(&back_buffer));
+	hr = _swap_chain->GetBuffer(0, __uuidof(ID3D11Texture2D),
+	                            reinterpret_cast<void**>(&back_buffer));
 
 	if (FAILED(hr)) {
 		logger::log_sys_error(hr, "GetBuffer error");
@@ -301,20 +278,16 @@ bool D3DApp::init_direct_3d()
 		return false;
 	}
 
-	hr = _d3d_device->CreateDepthStencilView(
-		_depth_stencil_buffer,
-		0,
-		&_depth_stencil_view);
+	hr = _d3d_device->CreateDepthStencilView(_depth_stencil_buffer, 0,
+	                                         &_depth_stencil_view);
 
 	if (FAILED(hr)) {
 		logger::log_sys_error(hr, "CreateDepthStencilView error");
 		return false;
 	}
 
-	_d3d_immediate_context->OMSetRenderTargets(
-		1,
-		&_render_target_view,
-		_depth_stencil_view);
+	_d3d_immediate_context->OMSetRenderTargets(1, &_render_target_view,
+	                                           _depth_stencil_view);
 
 	_screen_viewport.TopLeftX = 0.0f;
 	_screen_viewport.TopLeftY = 0.0f;
@@ -349,12 +322,11 @@ LRESULT CALLBACK D3DApp::wnd_proc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPa
 	static D3DApp* d3dapp = nullptr;
 
 	try {
-		switch(msg) {
-		case WM_CREATE:
-			{
-				auto* create_params = reinterpret_cast<CREATESTRUCT*>(lParam);
-				d3dapp = reinterpret_cast<D3DApp*>(create_params->lpCreateParams);
-			}
+		switch (msg) {
+		case WM_CREATE: {
+			auto* create_params = reinterpret_cast<CREATESTRUCT*>(lParam);
+			d3dapp = reinterpret_cast<D3DApp*>(create_params->lpCreateParams);
+		}
 			return 0;
 
 		case WM_ACTIVATE:
@@ -384,19 +356,18 @@ LRESULT CALLBACK D3DApp::wnd_proc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPa
 		case WM_DESTROY:
 			PostQuitMessage(0);
 			return 0;
-
 		}
 
 		return DefWindowProc(hwnd, msg, wParam, lParam);
 
-	} catch (LogError &e) {
+	} catch (LogError& e) {
 		// Do not call logger::log. We assume the logger will dump the
 		// error if possible.
 		MessageBoxA(hwnd, e.what(), "Fatal error!", MB_OK | MB_ICONERROR);
 
 		PostQuitMessage(0);
 		return 0;
-	} catch (std::exception &e) {
+	} catch (std::exception& e) {
 		MessageBoxA(hwnd, e.what(), "Fatal error!", MB_OK | MB_ICONERROR);
 		logger::log_fatal(e.what());
 

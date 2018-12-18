@@ -2,9 +2,8 @@
 #include "logger.h"
 
 DemoApp::DemoApp(HINSTANCE hInstance)
-	: D3DApp(hInstance)
+    : D3DApp(hInstance)
 {
-
 }
 
 DemoApp::~DemoApp()
@@ -23,7 +22,6 @@ void DemoApp::on_resize(int w, int h)
 
 void DemoApp::update_scene(float)
 {
-
 }
 
 void DemoApp::draw_scene()
@@ -34,15 +32,11 @@ void DemoApp::draw_scene()
 	HRESULT hr;
 	float   color = 0.0f;
 
-
 	_d3d_immediate_context->ClearRenderTargetView(_render_target_view, &color);
 	_d3d_immediate_context->ClearDepthStencilView(
-		_depth_stencil_view,
-		D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,
-		1.0f,
-		0);
+	    _depth_stencil_view, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-	hr = _swap_chain->Present(0,0);
+	hr = _swap_chain->Present(0, 0);
 
 	if (FAILED(hr)) {
 		logger::log_sys_error(hr, "SwapChain Present error");

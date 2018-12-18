@@ -5,9 +5,10 @@
 
 namespace win_utils {
 	struct LocalAllocDeleter {
-		void operator()(HLOCAL mem) {
+		void operator()(HLOCAL mem)
+		{
 			auto res = LocalFree(mem);
 			assert(res == 0);
 		}
 	};
-}
+} // namespace win_utils

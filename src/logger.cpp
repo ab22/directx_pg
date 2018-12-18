@@ -1,11 +1,13 @@
-#include "logger.h"
 #include "errors.h"
+#include "logger.h"
 #include "win_utils.h"
+
 
 #include <fmt/format.h>
 #include <fmt/time.h>
-#include <windowsx.h>
 #include <iostream>
+#include <windowsx.h>
+
 
 #include <string>
 
@@ -13,24 +15,24 @@ using logger::LogMode;
 
 const char* logger::log_mode_text(LogMode mode)
 {
-	switch(mode) {
-		case LogMode::debug:
-			return "DEBUG";
+	switch (mode) {
+	case LogMode::debug:
+		return "DEBUG";
 
-		case LogMode::info:
-			return "INFO";
+	case LogMode::info:
+		return "INFO";
 
-		case LogMode::warn:
-			return "WARN";
+	case LogMode::warn:
+		return "WARN";
 
-		case LogMode::error:
-			return "ERROR";
+	case LogMode::error:
+		return "ERROR";
 
-		case LogMode::fatal:
-			return "FATAL";
+	case LogMode::fatal:
+		return "FATAL";
 
-		default:
-			return "UNDEFINED";
+	default:
+		return "UNDEFINED";
 	}
 }
 
@@ -80,17 +82,12 @@ void logger::log_sys_error(HRESULT hr, std::string_view msg)
 	using win_utils::LocalAllocDeleter;
 	using LPSTR_guard = std::unique_ptr<CHAR, LocalAllocDeleter>;
 
-	LPSTR     sys_msg   = nullptr;
-	auto      msg_len   = FormatMessage(
-		FORMAT_MESSAGE_FROM_SYSTEM
-		| FORMAT_MESSAGE_ALLOCATE_BUFFER
-		| FORMAT_MESSAGE_IGNORE_INSERTS,
-		nullptr,
-		hr,
-		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-		reinterpret_cast<LPTSTR>(&sys_msg),
-		0,
-		nullptr);
+	LPSTR sys_msg = nullptr;
+	auto  msg_len =
+	    FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ALLOCATE_BUFFER |
+	                      FORMAT_MESSAGE_IGNORE_INSERTS,
+	                  nullptr, hr, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+	                  reinterpret_cast<LPTSTR>(&sys_msg), 0, nullptr);
 
 	if (msg_len == 0) {
 		auto formatted_msg = fmt::format("{}: [HRESULT:{}]", msg, hr);

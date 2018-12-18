@@ -1,10 +1,11 @@
 #pragma once
 
-#include <string_view>
 #include <Windows.h>
+#include <string_view>
 
 namespace logger {
-	enum class LogMode: unsigned char {
+	enum class LogMode : unsigned char
+	{
 		debug,
 		info,
 		warn,
@@ -22,4 +23,4 @@ namespace logger {
 	void log_fatal(std::string_view msg);
 
 	void log_sys_error(HRESULT, std::string_view msg);
-}
+} // namespace logger

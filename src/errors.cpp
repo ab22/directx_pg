@@ -4,15 +4,15 @@
 
 // Error Code implementation.
 ErrorCode::ErrorCode() noexcept
-	: _code(0)
-	, runtime_error("")
+    : _code(0)
+    , runtime_error("")
 {
 	_msg = fmt::format("error code [{}]", _code);
 }
 
 ErrorCode::ErrorCode(int code, const char* message) noexcept
-	: _code(code)
-	, runtime_error(message)
+    : _code(code)
+    , runtime_error(message)
 {
 	_msg = fmt::format("error code [{}]: {}", _code, message);
 }
@@ -34,6 +34,6 @@ const char* ErrorCode::what() const noexcept
 
 // Log Error implementation.
 LogError::LogError(int code, const char* message) noexcept
-	: ErrorCode(code, message)
+    : ErrorCode(code, message)
 {
 }

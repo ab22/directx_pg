@@ -3,7 +3,7 @@
 #include <cstdint>
 
 class GameTimer {
-public:
+  public:
 	GameTimer();
 
 	float game_time() const;
@@ -15,7 +15,7 @@ public:
 	void stop();
 	void tick();
 
-private:
+  private:
 	double _seconds_per_count;
 	double _delta_time;
 

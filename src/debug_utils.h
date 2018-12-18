@@ -3,6 +3,7 @@
 #include "logger.h"
 #include <fmt/format.h>
 
+// clang-format off
 namespace debug_utils {
 	#if defined(DEBUG) | defined(_DEBUG)
 		constexpr bool debug_mode = true;
@@ -25,3 +26,4 @@ namespace debug_utils {
 		constexpr bool win32_lean_and_mean = false;
 	#endif
 }
+// clang-format on

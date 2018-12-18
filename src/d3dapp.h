@@ -1,22 +1,22 @@
 #pragma once
 
-#include "debug_utils.h"
 #include "com_ptr.h"
+#include "debug_utils.h"
 #include "game_timer.h"
 
 // Disable macro redefinition warning inside Direct 3D header files.
 #pragma warning(push)
-#pragma warning(disable: 4005)
+#pragma warning(disable : 4005)
 #include <d3d11.h>
 #pragma warning(pop)
 
 #include <Windows.h>
-#include <windowsx.h>
-#include <memory>
 #include <cassert>
+#include <memory>
+#include <windowsx.h>
 
 class D3DApp {
-public:
+  public:
 	D3DApp(HINSTANCE);
 	virtual ~D3DApp();
 
@@ -31,12 +31,12 @@ public:
 	virtual void resume();
 	virtual void on_resize(int w, int h);
 	virtual void update_scene(float dt) = 0;
-	virtual void draw_scene() = 0;
+	virtual void draw_scene()           = 0;
 	virtual void on_mouse_down(WPARAM, int x, int y);
 	virtual void on_mouse_up(WPARAM, int x, int y);
 	virtual void on_mouse_move(WPARAM, int x, int y);
 
-protected:
+  protected:
 	GameTimer _game_timer;
 	HINSTANCE _hinstance;
 	HWND      _hwnd;
@@ -62,6 +62,6 @@ protected:
 	bool init_direct_3d();
 	void calculate_frame_stats();
 
-private:
+  private:
 	static LRESULT CALLBACK wnd_proc(HWND, UINT, WPARAM, LPARAM);
 };

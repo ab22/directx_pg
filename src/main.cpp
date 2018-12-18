@@ -20,7 +20,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, PSTR, int)
 		}
 
 		return app.run();
-	} catch (LogError &e) {
+	} catch (LogError& e) {
 		// Do not call logger::log. We assume the logger will dump the
 		// error if possible.
 		MessageBoxA(0, e.what(), "Fatal error!", MB_OK | MB_ICONERROR);
