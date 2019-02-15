@@ -2,7 +2,7 @@
 
 #include "d3dapp.h"
 
-class DemoApp : public D3DApp {
+class DemoApp: public D3DApp {
   public:
 	DemoApp(HINSTANCE);
 	~DemoApp();

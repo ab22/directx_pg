@@ -133,9 +133,18 @@ bool D3DApp::init_main_window()
 		return false;
 	}
 
-	_hwnd = CreateWindow(appName, appName, WS_OVERLAPPEDWINDOW, CW_USEDEFAULT,
-	                     CW_USEDEFAULT, _window_width, _window_height, nullptr, nullptr,
-	                     _hinstance, reinterpret_cast<void*>(this));
+	_hwnd = CreateWindow(
+	    appName,
+	    appName,
+	    WS_OVERLAPPEDWINDOW,
+	    CW_USEDEFAULT,
+	    CW_USEDEFAULT,
+	    _window_width,
+	    _window_height,
+	    nullptr,
+	    nullptr,
+	    _hinstance,
+	    reinterpret_cast<void*>(this));
 
 	ShowWindow(_hwnd, true);
 	UpdateWindow(_hwnd);
@@ -153,9 +162,17 @@ bool D3DApp::init_direct_3d()
 		create_device_flags |= D3D11_CREATE_DEVICE_DEBUG;
 	}
 
-	hr = D3D11CreateDevice(0, D3D_DRIVER_TYPE_HARDWARE, 0, create_device_flags, 0, 0,
-	                       D3D11_SDK_VERSION, &_d3d_device, &feature_level,
-	                       &_d3d_immediate_context);
+	hr = D3D11CreateDevice(
+	    0,
+	    D3D_DRIVER_TYPE_HARDWARE,
+	    0,
+	    create_device_flags,
+	    0,
+	    0,
+	    D3D11_SDK_VERSION,
+	    &_d3d_device,
+	    &feature_level,
+	    &_d3d_immediate_context);
 
 	if (FAILED(hr)) {
 		logger::log_sys_error(hr, "D3D11CreateDevice error");
@@ -167,8 +184,8 @@ bool D3DApp::init_direct_3d()
 		return false;
 	}
 
-	_d3d_device->CheckMultisampleQualityLevels(DXGI_FORMAT_R8G8B8A8_UNORM, 4,
-	                                           &_m4x_msaa_quality);
+	_d3d_device->CheckMultisampleQualityLevels(
+	    DXGI_FORMAT_R8G8B8A8_UNORM, 4, &_m4x_msaa_quality);
 
 	if (FAILED(hr)) {
 		logger::log_sys_error(hr, "CheckMultisampleQualityLevels error");
@@ -202,8 +219,8 @@ bool D3DApp::init_direct_3d()
 	sd.Flags        = 0;
 
 	ComPtr<IDXGIDevice> dxgi_device;
-	hr = _d3d_device->QueryInterface(__uuidof(IDXGIDevice),
-	                                 reinterpret_cast<void**>(&dxgi_device));
+	hr = _d3d_device->QueryInterface(
+	    __uuidof(IDXGIDevice), reinterpret_cast<void**>(&dxgi_device));
 
 	if (FAILED(hr)) {
 		logger::log_sys_error(hr, "D3D11CreateDevice error");
@@ -211,8 +228,8 @@ bool D3DApp::init_direct_3d()
 	}
 
 	ComPtr<IDXGIAdapter> dxgi_adapter;
-	hr = dxgi_device->GetParent(__uuidof(IDXGIAdapter),
-	                            reinterpret_cast<void**>(&dxgi_adapter));
+	hr = dxgi_device->GetParent(
+	    __uuidof(IDXGIAdapter), reinterpret_cast<void**>(&dxgi_adapter));
 
 	if (FAILED(hr)) {
 		logger::log_sys_error(hr, "dxgi_device->GetParent error");
@@ -220,8 +237,8 @@ bool D3DApp::init_direct_3d()
 	}
 
 	ComPtr<IDXGIFactory> dxgi_factory;
-	hr = dxgi_adapter->GetParent(__uuidof(IDXGIFactory),
-	                             reinterpret_cast<void**>(&dxgi_factory));
+	hr = dxgi_adapter->GetParent(
+	    __uuidof(IDXGIFactory), reinterpret_cast<void**>(&dxgi_factory));
 
 	if (FAILED(hr)) {
 		logger::log_sys_error(hr, "dxgi_adapter->GetParent error");
@@ -236,8 +253,8 @@ bool D3DApp::init_direct_3d()
 	}
 
 	ComPtr<ID3D11Texture2D> back_buffer;
-	hr = _swap_chain->GetBuffer(0, __uuidof(ID3D11Texture2D),
-	                            reinterpret_cast<void**>(&back_buffer));
+	hr = _swap_chain->GetBuffer(
+	    0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(&back_buffer));
 
 	if (FAILED(hr)) {
 		logger::log_sys_error(hr, "GetBuffer error");
@@ -278,16 +295,16 @@ bool D3DApp::init_direct_3d()
 		return false;
 	}
 
-	hr = _d3d_device->CreateDepthStencilView(_depth_stencil_buffer, 0,
-	                                         &_depth_stencil_view);
+	hr = _d3d_device->CreateDepthStencilView(
+	    _depth_stencil_buffer, 0, &_depth_stencil_view);
 
 	if (FAILED(hr)) {
 		logger::log_sys_error(hr, "CreateDepthStencilView error");
 		return false;
 	}
 
-	_d3d_immediate_context->OMSetRenderTargets(1, &_render_target_view,
-	                                           _depth_stencil_view);
+	_d3d_immediate_context->OMSetRenderTargets(
+	    1, &_render_target_view, _depth_stencil_view);
 
 	_screen_viewport.TopLeftX = 0.0f;
 	_screen_viewport.TopLeftY = 0.0f;

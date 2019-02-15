@@ -81,11 +81,14 @@ void logger::log_sys_error(HRESULT hr, std::string_view msg)
 	using LPSTR_guard = std::unique_ptr<CHAR, LocalAllocDeleter>;
 
 	LPSTR sys_msg = nullptr;
-	auto  msg_len =
-	    FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ALLOCATE_BUFFER |
-	                      FORMAT_MESSAGE_IGNORE_INSERTS,
-	                  nullptr, hr, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-	                  reinterpret_cast<LPTSTR>(&sys_msg), 0, nullptr);
+	auto  msg_len = FormatMessage(
+        0,
+        nullptr,
+        hr,
+        MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+        reinterpret_cast<LPTSTR>(&sys_msg),
+        0,
+        nullptr);
 
 	if (msg_len == 0) {
 		auto formatted_msg = fmt::format("{}: [HRESULT:{}]", msg, hr);
