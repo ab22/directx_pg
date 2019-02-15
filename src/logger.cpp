@@ -2,12 +2,10 @@
 #include "logger.h"
 #include "win_utils.h"
 
-
 #include <fmt/format.h>
 #include <fmt/time.h>
 #include <iostream>
 #include <windowsx.h>
-
 
 #include <string>
 
