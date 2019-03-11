@@ -1,3 +1,7 @@
 [submodule "vendor/fmt"]
 	path = vendor/fmt
 	url = https://github.com/fmtlib/fmt
+[submodule "vendor/expected"]
+	path = vendor/expected
+	url = git@github.com:TartanLlama/expected.git
+	branch = master
