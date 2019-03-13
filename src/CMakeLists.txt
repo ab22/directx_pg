@@ -22,6 +22,7 @@ add_executable(app
 target_include_directories(app
     PRIVATE
         "${CMAKE_CURRENT_SOURCE_DIR}"
+        "${CMAKE_SOURCE_DIR}/vendor/expected"
 )
 
 target_link_libraries(app

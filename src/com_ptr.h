@@ -1,5 +1,7 @@
 #pragma once
 
+#include <windows.h>
+
 template <typename T>
 class ComPtr {
   private:
