@@ -20,6 +20,7 @@ add_executable(app
         win_utils.h
         vertex.h
 
+        shaders/vertex1_fx.fx
         shaders/vertex1_ps.hlsl
         shaders/vertex1_vs.hlsl
 )
