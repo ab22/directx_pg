@@ -103,6 +103,16 @@ void D3DApp::resume()
 void D3DApp::on_resize(int w, int h)
 {
 	assert(w > 0 && h > 0);
+
+	_window_width  = w;
+	_window_height = h;
+
+	if (_swap_chain == nullptr) {
+		logger::log_info("on resize: swap chain is not initialized yet!");
+		return;
+	}
+
+	_swap_chain->ResizeBuffers(1, w, h, DXGI_FORMAT_B8G8R8A8_UNORM, 0);
 }
 
 void D3DApp::on_mouse_down(WPARAM, int, int)
@@ -379,6 +389,10 @@ LRESULT CALLBACK D3DApp::wnd_proc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPa
 
 		case WM_MOUSEMOVE:
 			d3dapp->on_mouse_move(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+			return 0;
+
+		case WM_SIZE:
+			d3dapp->on_resize(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
 			return 0;
 
 		case WM_DESTROY:

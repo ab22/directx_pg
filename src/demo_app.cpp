@@ -37,8 +37,6 @@ std::optional<std::string> DemoApp::init()
 {
 	std::optional<std::string> err = std::nullopt;
 
-	DemoApp::on_resize(_window_width, _window_height);
-
 	err = D3DApp::init();
 	if (err)
 		return err;
@@ -65,18 +63,11 @@ void DemoApp::update_scene(float)
 	float x = _radius * XMScalarSin(_phi) * XMScalarCos(_theta);
 	float z = _radius * XMScalarSin(_phi) * XMScalarSin(_theta);
 	float y = _radius * XMScalarCos(_phi);
-	/*static float x = 0.0f;
-	static float y = 100.0f;
-	static float z = 0.0f;*/
 
 	// Build view matrix.
 	XMVECTOR pos    = XMVectorSet(x, y, z, 1.f);
 	XMVECTOR target = XMVectorZero();
 	XMVECTOR up     = XMVectorSet(0.f, 1.f, 0.f, 0.f);
-	/*
-	    x -= 1.f;
-	    y += 1.f;
-	    z += 1.f;*/
 
 	XMMATRIX V = XMMatrixLookAtLH(pos, target, up);
 	XMStoreFloat4x4(&_view, V);
@@ -108,27 +99,6 @@ std::optional<std::string> DemoApp::draw_scene()
 	cb.world = XMMatrixTranspose(XMLoadFloat4x4(&_world));
 	cb.view  = XMMatrixTranspose(XMLoadFloat4x4(&_view));
 	cb.proj  = XMMatrixTranspose(XMLoadFloat4x4(&_proj));
-	// XMMATRIX WVP   = world * view * proj;
-
-	// Initialize the world matrix
-	/*
-	static float t = 0.0f;
-	t += XM_PI * 0.0125f;
-	static XMMATRIX g_World = XMMatrixIdentity();
-	g_World                 = XMMatrixRotationY(t);
-	g_World                 = XMMatrixTranspose(g_World);
-
-	// Initialize the view matrix
-	XMVECTOR Eye    = XMVectorSet(0.0f, 1.0f, -5.0f, 0.0f);
-	XMVECTOR At     = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-	XMVECTOR Up     = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-	XMMATRIX g_View = XMMatrixLookAtLH(Eye, At, Up);
-	g_View          = XMMatrixTranspose(g_View);
-
-	// Initialize the projection matrix
-	XMMATRIX g_Proj = XMMatrixPerspectiveFovLH(XM_PIDIV2, aspect_ratio(),
-	0.01f, 100.0f); g_Proj          = XMMatrixTranspose(g_Proj); XMMATRIX
-	WVP    = g_World; WVP *= g_View; WVP *= g_Proj;*/
 
 	_d3d_immediate_context->UpdateSubresource(_box_const_buffer, 0, nullptr, &cb, 0, 0);
 	_d3d_immediate_context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -163,21 +133,6 @@ std::optional<std::string> DemoApp::build_geometry_buffers()
         {XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f)},
         {XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f)},
     };
-
-	/*Vertex1 vertices[] = {
-	    {XMFLOAT3(-0.5f, 0.5f, -0.5f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f)}, // +Y (top face)
-	    {XMFLOAT3(0.5f, 0.5f, -0.5f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f)},
-	    {XMFLOAT3(0.5f, 0.5f, 0.5f), XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f)},
-	    {XMFLOAT3(-0.5f, 0.5f, 0.5f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f)},
-
-	    {XMFLOAT3(-0.5f, -0.5f, 0.5f),
-	     XMFLOAT4(1.0f, 0.0f, 1.0f, 1.0f)}, // -Y (bottom face)
-	    {XMFLOAT3(0.5f, -0.5f, 0.5f), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f)},
-	    {XMFLOAT3(0.5f, -0.5f, -0.5f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f)},
-	    {XMFLOAT3(-0.5f, -0.5f, -0.5f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f)}};*/
-
-	/*Vertex2 vertices[] = {
-	    XMFLOAT2(-0.5f, -0.5), XMFLOAT2(0.0f, 0.5f), XMFLOAT2(0.5f, -0.5f)};*/
 
 	D3D11_BUFFER_DESC vbd;
 	vbd.Usage               = D3D11_USAGE_IMMUTABLE;
@@ -345,11 +300,6 @@ std::optional<std::string> DemoApp::build_vertex_layout(std::vector<std::byte>& 
 		{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
 		{"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0}
 	};
-
-	/*D3D11_INPUT_ELEMENT_DESC vertex_desc[] =
-	{
-		{ "POSITION", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 }
-	};*/
 	// clang-format on
 
 	HRESULT hr = _d3d_device->CreateInputLayout(
