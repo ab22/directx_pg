@@ -1,10 +1,12 @@
 #pragma once
 
 #include "logger.h"
+#include "win_utils.h"
 #include <fmt/format.h>
+#include <string>
 
-// clang-format off
 namespace debug_utils {
+// clang-format off
 	#if defined(DEBUG) | defined(_DEBUG)
 		constexpr bool debug_mode = true;
 
@@ -25,5 +27,7 @@ namespace debug_utils {
 	#else
 		constexpr bool win32_lean_and_mean = false;
 	#endif
-}
-// clang-format on
+	// clang-format on
+
+	std::string get_system_error(HRESULT hr);
+} // namespace debug_utils

@@ -47,7 +47,7 @@ void logger::log(LogMode mode, std::string_view msg)
 		throw LogError(err, "Failed to acquire localtime");
 	}
 
-	fmt::print("{:%Y-%m-%d %X} [{}]: {}", tm, mode_str, msg);
+	fmt::print("{:%Y-%m-%d %X} [{}]: {}\n", tm, mode_str, msg);
 }
 
 void logger::log_debug(std::string_view msg)
@@ -73,31 +73,4 @@ void logger::log_error(std::string_view msg)
 void logger::log_fatal(std::string_view msg)
 {
 	logger::log(LogMode::fatal, msg);
-}
-
-void logger::log_sys_error(HRESULT hr, std::string_view msg)
-{
-	using win_utils::LocalAllocDeleter;
-	using LPSTR_guard = std::unique_ptr<CHAR, LocalAllocDeleter>;
-
-	LPSTR sys_msg = nullptr;
-	auto  msg_len = FormatMessage(
-        0,
-        nullptr,
-        hr,
-        MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-        reinterpret_cast<LPTSTR>(&sys_msg),
-        0,
-        nullptr);
-
-	if (msg_len == 0) {
-		auto formatted_msg = fmt::format("{}: [HRESULT:{}]", msg, hr);
-		// Log the user message only.
-		logger::log_error(formatted_msg);
-		throw LogError(GetLastError(), "FormatMessage failed!");
-	}
-
-	LPSTR_guard str_guard(sys_msg);
-	auto        formatted_msg = fmt::format("{}: [{}] {}", msg, hr, sys_msg);
-	logger::log_error(formatted_msg);
 }

@@ -37,3 +37,9 @@ LogError::LogError(int code, const char* message) noexcept
     : ErrorCode(code, message)
 {
 }
+
+// HResult Error implementation.
+HResultError::HResultError(HRESULT code, const char* message) noexcept
+    : ErrorCode(code, message)
+{
+}

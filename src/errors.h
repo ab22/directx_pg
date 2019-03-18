@@ -1,7 +1,9 @@
 #pragma once
 
+#include <Windows.h>
 #include <exception>
 #include <string>
+
 
 class ErrorCode: public std::runtime_error {
   protected:
@@ -20,9 +22,17 @@ class ErrorCode: public std::runtime_error {
 	virtual ErrorCode& operator=(ErrorCode&&) = default;
 
 	virtual explicit operator bool() const noexcept;
+
+  private:
+	inline void format_err_msg();
 };
 
 class LogError: public ErrorCode {
   public:
 	LogError(int, const char* message) noexcept;
+};
+
+class HResultError: public ErrorCode {
+  public:
+	HResultError(HRESULT hr, const char* message) noexcept;
 };

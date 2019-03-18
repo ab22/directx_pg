@@ -11,15 +11,26 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, PSTR, int)
 		_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 	}
 
+	logger::log_info("Starting application...");
+
 	try {
 		DemoApp app(hInstance);
 
-		if (!app.init()) {
+		auto err = app.init();
+		if (err) {
+			logger::log_error(err.value());
 			MessageBox(NULL, TEXT("App initialization failed!"), 0, MB_ICONERROR);
 			return -1;
 		}
 
-		return app.run();
+		err = app.run();
+
+		if (err) {
+			logger::log_error(err.value());
+			return -1;
+		}
+
+		return 0;
 	} catch (LogError& e) {
 		// Do not call logger::log. We assume the logger will dump the
 		// error if possible.
