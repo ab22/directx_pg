@@ -12,7 +12,5 @@ struct Vertex2 {
 };
 
 struct ConstantBuffer {
-	DirectX::XMMATRIX world;
-	DirectX::XMMATRIX view;
-	DirectX::XMMATRIX proj;
+	DirectX::XMFLOAT4X4 wvp;
 };

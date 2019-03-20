@@ -1,6 +1,7 @@
 #include <DirectXColors.h>
 #include <d3dcompiler.h>
 #include <fstream>
+#include <math.h>
 
 #include "debug_utils.h"
 #include "demo_app.h"
@@ -53,7 +54,7 @@ void DemoApp::on_resize(int w, int h)
 {
 	D3DApp::on_resize(w, h);
 
-	XMMATRIX persp = XMMatrixPerspectiveFovLH(0.25f * XM_PI, aspect_ratio(), 1.f, 1000.f);
+	XMMATRIX persp = XMMatrixPerspectiveFovLH(XM_PIDIV4, aspect_ratio(), 1.f, 1000.f);
 	XMStoreFloat4x4(&_proj, persp);
 }
 
@@ -96,15 +97,20 @@ std::optional<std::string> DemoApp::draw_scene()
 
 	// Set constants
 	ConstantBuffer cb;
-	cb.world = XMMatrixTranspose(XMLoadFloat4x4(&_world));
-	cb.view  = XMMatrixTranspose(XMLoadFloat4x4(&_view));
-	cb.proj  = XMMatrixTranspose(XMLoadFloat4x4(&_proj));
+	XMMATRIX       world = XMLoadFloat4x4(&_world);
+	XMMATRIX       view  = XMLoadFloat4x4(&_view);
+	XMMATRIX       proj  = XMLoadFloat4x4(&_proj);
+	XMMATRIX       wvp   = world * view * proj;
+	wvp                  = XMMatrixTranspose(wvp);
+
+	XMStoreFloat4x4(&cb.wvp, wvp);
 
 	_d3d_immediate_context->UpdateSubresource(_box_const_buffer, 0, nullptr, &cb, 0, 0);
 	_d3d_immediate_context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	_d3d_immediate_context->VSSetShader(_vertex_shader, nullptr, 0);
 	_d3d_immediate_context->VSSetConstantBuffers(0, 1, &_box_const_buffer);
 	_d3d_immediate_context->PSSetShader(_pixel_shader, nullptr, 0);
+	_d3d_immediate_context->RSSetState(_rasterizer_state);
 	_d3d_immediate_context->DrawIndexed(36, 0, 0);
 
 	hr = _swap_chain->Present(1, 0);
@@ -211,6 +217,18 @@ std::optional<std::string> DemoApp::build_geometry_buffers()
 	if (FAILED(hr)) {
 		auto sys_err = debug_utils::get_system_error(hr);
 		return fmt::format("Create constant buffer failed: {}", sys_err);
+	}
+
+	D3D11_RASTERIZER_DESC rd;
+	memset(&rd, 0, sizeof(rd));
+	rd.CullMode = D3D11_CULL_FRONT;
+	rd.FillMode = D3D11_FILL_SOLID;
+
+	hr = _d3d_device->CreateRasterizerState(&rd, &_rasterizer_state);
+
+	if (FAILED(hr)) {
+		auto sys_err = debug_utils::get_system_error(hr);
+		return fmt::format("Failed to create rasterizer state: {}", sys_err);
 	}
 
 	return std::nullopt;

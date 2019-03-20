@@ -1,8 +1,6 @@
-cbuffer cbPerObject
+cbuffer cbPerObject : register(b0)
 {
-	matrix world;
-	matrix view;
-	matrix proj;
+	matrix wvp;
 }
 
 struct VertexIn
@@ -21,12 +19,7 @@ VertexOut vertex_shader(VertexIn input)
 {
 	VertexOut output;
 	float4 pos = float4(input.position, 1.0f);
-
-	pos = mul(pos, world);
-	pos = mul(pos, view);
-	pos = mul(pos, proj);
-
-	output.pos_h = pos;
+	output.pos_h = mul(pos, wvp);
 	output.color = input.color;
 
 	return output;
@@ -35,4 +28,22 @@ VertexOut vertex_shader(VertexIn input)
 float4 pixel_shader(VertexOut input) : SV_TARGET
 {
 	return input.color;
+}
+
+RasterizerState WireframeRS
+{
+	FillMode = Wireframe;
+	CullMode = Back;
+	FrontCounterClockwise = false;
+};
+
+technique11 ColorTech
+{
+	pass P0
+	{
+		SetVertexShader(CompileShader(vs_5_0, vertex_shader()));
+		SetPixelShader(CompileShader(ps_5_0, pixel_shader()));
+
+		SetRasterizerState(WireframeRS);
+	}
 }
