@@ -50,12 +50,16 @@ std::optional<std::string> DemoApp::init()
 	return err;
 }
 
-void DemoApp::on_resize(int w, int h)
+std::optional<std::string> DemoApp::on_resize(int w, int h)
 {
-	D3DApp::on_resize(w, h);
+	auto err = D3DApp::on_resize(w, h);
+	if (err)
+		return err;
 
 	XMMATRIX persp = XMMatrixPerspectiveFovLH(XM_PIDIV4, aspect_ratio(), 1.f, 1000.f);
 	XMStoreFloat4x4(&_proj, persp);
+
+	return std::nullopt;
 }
 
 void DemoApp::update_scene(float)

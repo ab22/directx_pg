@@ -31,7 +31,7 @@ class D3DApp {
 
 	virtual void                       pause();
 	virtual void                       resume();
-	virtual void                       on_resize(int w, int h);
+	virtual std::optional<std::string> on_resize(int w, int h);
 	virtual void                       update_scene(float dt) = 0;
 	virtual std::optional<std::string> draw_scene()           = 0;
 	virtual void                       on_mouse_down(WPARAM, int x, int y);
@@ -62,6 +62,10 @@ class D3DApp {
 
 	std::optional<std::string> init_main_window();
 	std::optional<std::string> init_direct_3d();
+	std::optional<std::string>
+	                           create_depth_stencil_buff(int width, int height, bool enable_4x_msaa);
+	std::optional<std::string> create_render_target_view(IDXGISwapChain&);
+	void                       create_viewport(int width, int height);
 	void                       calculate_frame_stats();
 
   private:

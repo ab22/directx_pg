@@ -100,7 +100,7 @@ void D3DApp::resume()
 	_game_timer.start();
 }
 
-void D3DApp::on_resize(int w, int h)
+std::optional<std::string> D3DApp::on_resize(int w, int h)
 {
 	assert(w > 0 && h > 0);
 
@@ -109,10 +109,32 @@ void D3DApp::on_resize(int w, int h)
 
 	if (_swap_chain == nullptr) {
 		logger::log_info("on resize: swap chain is not initialized yet!");
-		return;
+		return std::nullopt;
 	}
 
+	// Release objects that make use of the back buffers or that depend on
+	// the screen resolution.
+	_render_target_view->Release();
+	_depth_stencil_buffer->Release();
+	_depth_stencil_view->Release();
+	_d3d_immediate_context->ClearState();
+
 	_swap_chain->ResizeBuffers(1, w, h, DXGI_FORMAT_B8G8R8A8_UNORM, 0);
+
+	auto err = create_render_target_view(*_swap_chain);
+	if (err)
+		return err;
+
+	err = create_depth_stencil_buff(_window_width, _window_height, _enable_4x_msaa);
+	if (err)
+		return err;
+
+	create_viewport(_window_width, _window_height);
+	_d3d_immediate_context->OMSetRenderTargets(
+	    1, &_render_target_view, _depth_stencil_view);
+	_d3d_immediate_context->RSSetViewports(1, &_screen_viewport);
+
+	return std::nullopt;
 }
 
 void D3DApp::on_mouse_down(WPARAM, int, int)
@@ -234,14 +256,12 @@ std::optional<std::string> D3DApp::init_direct_3d()
 	ComPtr<IDXGIDevice2> dxgi_device;
 	hr = _d3d_device->QueryInterface(
 	    __uuidof(IDXGIDevice2), reinterpret_cast<void**>(&dxgi_device));
-
 	if (FAILED(hr)) {
 		auto sys_err = debug_utils::get_system_error(hr);
 		return fmt::format("Query Interface for IDXGIDevice2 failed: {}", sys_err);
 	}
 
 	hr = dxgi_device->SetMaximumFrameLatency(1);
-
 	if (FAILED(hr)) {
 		auto sys_err = debug_utils::get_system_error(hr);
 		return fmt::format("IDXGIDevice set max frame latency failed: {}", sys_err);
@@ -250,52 +270,54 @@ std::optional<std::string> D3DApp::init_direct_3d()
 	ComPtr<IDXGIAdapter> dxgi_adapter;
 	hr = dxgi_device->GetParent(
 	    __uuidof(IDXGIAdapter), reinterpret_cast<void**>(&dxgi_adapter));
-
 	if (FAILED(hr)) {
 		auto sys_err = debug_utils::get_system_error(hr);
-		return fmt::format("dxgi_device->GetParent error: {}", sys_err);
+		return fmt::format("Failed to get DXGI Adapter: {}", sys_err);
 	}
 
 	ComPtr<IDXGIFactory> dxgi_factory;
 	hr = dxgi_adapter->GetParent(
 	    __uuidof(IDXGIFactory), reinterpret_cast<void**>(&dxgi_factory));
-
 	if (FAILED(hr)) {
 		auto sys_err = debug_utils::get_system_error(hr);
-		return fmt::format("dxgi_adapter->GetParent error: {}", sys_err);
+		return fmt::format("Failed to get DXGI Factory: {}", sys_err);
 	}
 
 	hr = dxgi_factory->CreateSwapChain(_d3d_device, &sd, &_swap_chain);
-
 	if (FAILED(hr)) {
 		auto sys_err = debug_utils::get_system_error(hr);
 		return fmt::format("CreateSwapChain error: {}", sys_err);
 	}
 
-	ComPtr<ID3D11Texture2D> back_buffer;
-	hr = _swap_chain->GetBuffer(
-	    0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(&back_buffer));
+	auto err = create_render_target_view(*_swap_chain);
+	if (err)
+		return err;
 
-	if (FAILED(hr)) {
-		auto sys_err = debug_utils::get_system_error(hr);
-		return fmt::format("GetBuffer error: {}", sys_err);
-	}
+	err = create_depth_stencil_buff(_window_width, _window_height, _enable_4x_msaa);
+	if (err)
+		return err;
 
-	hr = _d3d_device->CreateRenderTargetView(back_buffer, 0, &_render_target_view);
+	create_viewport(_window_width, _window_height);
+	_d3d_immediate_context->OMSetRenderTargets(
+	    1, &_render_target_view, _depth_stencil_view);
+	_d3d_immediate_context->RSSetViewports(1, &_screen_viewport);
 
-	if (FAILED(hr)) {
-		auto sys_err = debug_utils::get_system_error(hr);
-		return fmt::format("CreateRenderTargetView error: {}", sys_err);
-	}
+	return std::nullopt;
+}
 
+std::optional<std::string>
+D3DApp::create_depth_stencil_buff(int width, int height, bool enable_4x_msaa)
+{
 	D3D11_TEXTURE2D_DESC depth_stencil_desc;
-	depth_stencil_desc.Width     = _window_width;
-	depth_stencil_desc.Height    = _window_height;
+	HRESULT              hr;
+
+	depth_stencil_desc.Width     = width;
+	depth_stencil_desc.Height    = height;
 	depth_stencil_desc.MipLevels = 1;
 	depth_stencil_desc.ArraySize = 1;
 	depth_stencil_desc.Format    = DXGI_FORMAT_D24_UNORM_S8_UINT;
 
-	if (_enable_4x_msaa) {
+	if (enable_4x_msaa) {
 		depth_stencil_desc.SampleDesc.Count   = 4;
 		depth_stencil_desc.SampleDesc.Quality = _m4x_msaa_quality;
 	} else {
@@ -323,19 +345,40 @@ std::optional<std::string> D3DApp::init_direct_3d()
 		return fmt::format("CreateDepthStencilView error: {}", sys_err);
 	}
 
-	_d3d_immediate_context->OMSetRenderTargets(
-	    1, &_render_target_view, _depth_stencil_view);
+	return std::nullopt;
+}
 
-	_screen_viewport.TopLeftX = 0.0f;
-	_screen_viewport.TopLeftY = 0.0f;
-	_screen_viewport.Width    = static_cast<float>(_window_width);
-	_screen_viewport.Height   = static_cast<float>(_window_height);
-	_screen_viewport.MinDepth = D3D11_MIN_DEPTH;
-	_screen_viewport.MaxDepth = D3D11_MAX_DEPTH;
+std::optional<std::string> D3DApp::create_render_target_view(IDXGISwapChain& swap_chain)
+{
+	ComPtr<ID3D11Texture2D> back_buffer;
+	HRESULT                 hr;
 
-	_d3d_immediate_context->RSSetViewports(1, &_screen_viewport);
+	hr = swap_chain.GetBuffer(
+	    0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(&back_buffer));
+
+	if (FAILED(hr)) {
+		auto sys_err = debug_utils::get_system_error(hr);
+		return fmt::format("GetBuffer error: {}", sys_err);
+	}
+
+	hr = _d3d_device->CreateRenderTargetView(back_buffer, 0, &_render_target_view);
+
+	if (FAILED(hr)) {
+		auto sys_err = debug_utils::get_system_error(hr);
+		return fmt::format("CreateRenderTargetView error: {}", sys_err);
+	}
 
 	return std::nullopt;
+}
+
+void D3DApp::create_viewport(int width, int height)
+{
+	_screen_viewport.TopLeftX = 0.0f;
+	_screen_viewport.TopLeftY = 0.0f;
+	_screen_viewport.Width    = static_cast<float>(width);
+	_screen_viewport.Height   = static_cast<float>(height);
+	_screen_viewport.MinDepth = D3D11_MIN_DEPTH;
+	_screen_viewport.MaxDepth = D3D11_MAX_DEPTH;
 }
 
 void D3DApp::calculate_frame_stats()

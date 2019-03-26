@@ -17,7 +17,7 @@ class DemoApp: public D3DApp {
 
 	std::optional<std::string> init() override;
 
-	void                       on_resize(int w, int h) override;
+	std::optional<std::string> on_resize(int w, int h) override;
 	void                       update_scene(float dt) override;
 	std::optional<std::string> draw_scene() override;
 
