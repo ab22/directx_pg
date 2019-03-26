@@ -6,7 +6,7 @@
 #include <string>
 
 namespace debug_utils {
-// clang-format off
+	// clang-format off
 	#if defined(DEBUG) | defined(_DEBUG)
 		constexpr bool debug_mode = true;
 
